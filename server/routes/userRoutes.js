@@ -33,7 +33,33 @@ router.post("/register", async (req, res) => {
 
 // Placeholder for login route
 router.post("/login", async (req, res) => {
-    // Implementation for login
+
+    //check if user exists of not
+    const user = await User.findOne({email:req.body.email})
+    //if no user by that email
+    if(!user){
+        res.send({
+            sucess: false,
+            message:"User doesnt exist , please register"
+        })
+    }
+
+
+
+    //check if password if correct opr not
+    const validPassword = await bcrypt.compare(req.body.password, user.password);
+    if(!validPassword){
+        res.send({
+            success: false,
+            message: "Invalid pass"
+        })
+    }else {
+        res.send({
+            success: true,
+            message:"login successful"
+        })
+    }
+
 });
 
 // Get all users
