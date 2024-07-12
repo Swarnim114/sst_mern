@@ -3,16 +3,27 @@ import { Button, Form, Input } from "antd";
 import { Link , useNavigate } from "react-router-dom";
 
 import {message} from 'antd'
+import { LoginUser } from '../calls/users';
 
 
 function Login() {
-  
-  const onFinish = async (values)=>{
-    console.log(values)
-   
-  }
+  const navigate = useNavigate()
+  const onFinish = async (values) => {
+    console.log(values);
+    try {
+      const response = await LoginUser(values);
+      if (response.success) {
+        message.success(response.message);
+        navigate('/');
+      } else {
+        message.error(response.message);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
- 
+
   return (
     <>
     <header className="App-header">
@@ -23,7 +34,7 @@ function Login() {
 
         <section className="right-section">
           <Form layout="vertical" onFinish={onFinish}>
-    
+
           <Form.Item
               label="Email"
               htmlFor="email"
@@ -49,7 +60,7 @@ function Login() {
                 id="password"
                 type="password"
                 placeholder="Enter your Password"
-                
+
               ></Input>
             </Form.Item>
 
