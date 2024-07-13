@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react'
 import { Button, Form, Input } from "antd";
 import { Link , useNavigate } from "react-router-dom";
-
 import {message} from 'antd'
 import { LoginUser } from '../calls/users';
 
@@ -23,7 +22,13 @@ function Login() {
       console.log(err);
     }
   };
-
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      navigate("/")
+    } else {
+      navigate("/login");
+    }
+  }, [navigate]);
 
 
 
