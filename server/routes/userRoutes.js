@@ -3,6 +3,7 @@ const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken')
 const router = express.Router();
+const authMiddlware = require("../middleware/authMiddleware")
 
 router.post("/register", async (req, res) => {
     try {
@@ -14,7 +15,7 @@ router.post("/register", async (req, res) => {
             });
         }
         const salt = await bcrypt.genSalt(10)
-        const tempPass =  await bcrypt.hash(req.body.password , salt);
+        const tempPass = await bcrypt.hash(req.body.password, salt);
         req.body.password = tempPass;
 
         const newUser = new User(req.body);
@@ -35,12 +36,12 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
 
     //check if user exists of not
-    const user = await User.findOne({email:req.body.email})
+    const user = await User.findOne({ email: req.body.email })
     //if no user by that email
-    if(!user){
+    if (!user) {
         res.send({
             sucess: false,
-            message:"User doesnt exist , please register"
+            message: "User doesnt exist , please register"
         })
     }
 
@@ -48,19 +49,19 @@ router.post("/login", async (req, res) => {
 
     //check if password if correct opr not
     const validPassword = await bcrypt.compare(req.body.password, user.password);
-    if(!validPassword){
+    if (!validPassword) {
         res.send({
             success: false,
             message: "Invalid pass"
         })
-    }else {
-        const token = jwt.sign({userId: user._id} , process.env.JWT_SECRET , {expiresIn:"1d"});
+    } else {
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
 
 
         res.send({
             success: true,
-            message:"login successful",
-            token:token
+            message: "login successful",
+            token: token
         })
     }
 
@@ -78,5 +79,22 @@ router.get("/", async (req, res) => {
         });
     }
 });
+
+router.get('/get-current-user', authMiddlware, async (req, res) => {
+    try {
+        const user = await User.findById(req.body.userId).select('-password')
+        res.send({
+            success: true,
+            message: "You are authorised",
+            data: user
+        })
+
+    } catch (error) {
+        res.send({
+            success: false,
+            message: "Not authourized"
+        })
+    }
+})
 
 module.exports = router;
